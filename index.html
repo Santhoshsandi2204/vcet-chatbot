@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VCET AI Chatbot - Velammal College of Engineering & Technology</title>
+    <!-- Google Fonts - Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Markdown Parser (Marked.js) for rendering LLM replies correctly -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="glow-bg-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <div class="app-shell">
+        <!-- SIDEBAR (ChatGPT style) -->
+        <aside class="chat-sidebar">
+            <div class="sidebar-header">
+                <button id="new-chat-btn" class="btn-new-chat">
+                    <i class="fa-solid fa-plus"></i> New Chat
+                </button>
+            </div>
+            
+            <!-- Chat History log -->
+            <div class="chat-history" id="chat-history-container">
+                <div class="history-section-title">Recent Conversations</div>
+                <div class="history-list" id="history-list">
+                    <!-- Injected dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Sidebar Footer Controls -->
+            <div class="sidebar-footer">
+                <button id="toggle-directory-btn" class="sidebar-footer-btn">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Campus Directory</span>
+                </button>
+                <button id="theme-toggle" class="sidebar-footer-btn">
+                    <i class="fa-solid fa-sun"></i>
+                    <span>Toggle Light Mode</span>
+                </button>
+                <div class="sidebar-profile">
+                    <div class="profile-avatar">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div class="profile-meta">
+                        <div class="profile-name">VCET Madurai</div>
+                        <div class="profile-sub">Autonomous Campus</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONVERSATION PANEL -->
+        <main class="chat-workspace">
+            <header class="workspace-header">
+                <div class="bot-info">
+                    <span class="bot-badge">VCET AI</span>
+                    <span class="engine-badge" id="engine-badge">Engine: Connecting...</span>
+                </div>
+                <button id="clear-chats-btn" class="btn-icon-clear" title="Clear all history">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </header>
+
+            <div class="chat-messages-scroll" id="chat-messages-container">
+                <!-- Welcome screen when there are no messages -->
+                <div class="chat-welcome-screen" id="welcome-screen">
+                    <div class="welcome-logo">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h2>How can I help you today?</h2>
+                    <p>Ask anything about courses, departments, HODs, transport fees, or administrative desks at Velammal College of Engineering & Technology.</p>
+                    
+                    <div class="suggestions-grid">
+                        <div class="suggestion-card" data-query="What B.E. and B.Tech. courses are available at VCET?">
+                            <div class="card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                            <h4>Browse Courses</h4>
+                            <p>Lists available UG/PG departments & requirements</p>
+                        </div>
+                        <div class="suggestion-card" data-query="Who are the HODs of the departments and what are their email IDs?">
+                            <div class="card-icon"><i class="fa-solid fa-user-tie"></i></div>
+                            <h4>Find Department HODs</h4>
+                            <p>View HOD list, email IDs, and extension lines</p>
+                        </div>
+                        <div class="suggestion-card" data-query="What is the transport fee and what bus routes are available?">
+                            <div class="card-icon"><i class="fa-solid fa-bus"></i></div>
+                            <h4>Transport & Routes</h4>
+                            <p>View bus routes, zones, and calculator details</p>
+                        </div>
+                        <div class="suggestion-card" data-query="Who is the Principal and how do I contact the admission office?">
+                            <div class="card-icon"><i class="fa-solid fa-phone"></i></div>
+                            <h4>Leadership & Contact</h4>
+                            <p>Office address, admissions numbers, and emails</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Log (Injected dynamically) -->
+                <div class="messages-log" id="messages-log"></div>
+            </div>
+
+            <!-- Input Bar Area -->
+            <footer class="workspace-footer">
+                <form class="chat-input-pill" id="chat-form">
+                    <input type="text" id="chat-input" placeholder="Message VCET AI..." required autocomplete="off">
+                    <button type="submit" class="btn-send" id="btn-send" aria-label="Send message">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                </form>
+                <div class="chat-disclaimer">
+                    VCET AI Bot may display fallback local database data if Gemini API keys are unconfigured. Always verify admission fees directly.
+                </div>
+            </footer>
+        </main>
+
+        <!-- RIGHT DRAWER: CAMPUS DIRECTORY explorer -->
+        <section class="directory-drawer" id="directory-drawer">
+            <div class="drawer-header">
+                <h3><i class="fa-solid fa-compass"></i> Campus Directory</h3>
+                <button id="close-drawer-btn" class="btn-close-drawer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="drawer-tabs">
+                <button class="drawer-tab-btn active" data-tab="courses">Courses</button>
+                <button class="drawer-tab-btn" data-tab="staff">Staff</button>
+                <button class="drawer-tab-btn" data-tab="transport">Transit</button>
+                <button class="drawer-tab-btn" data-tab="location">Contact</button>
+            </div>
+
+            <div class="drawer-content-scroll">
+                <!-- Tab: Courses -->
+                <div class="drawer-tab-content active" id="dtab-courses">
+                    <div class="drawer-search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="course-search" placeholder="Search B.E. / B.Tech courses...">
+                    </div>
+                    <div class="drawer-list" id="courses-list-container">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Tab: Staff -->
+                <div class="drawer-tab-content" id="dtab-staff">
+                    <div class="drawer-search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="staff-search" placeholder="Search HODs, professors...">
+                    </div>
+                    <div class="drawer-list" id="staff-list-container">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Tab: Transport -->
+                <div class="drawer-tab-content" id="dtab-transport">
+                    <div class="transit-box">
+                        <div class="calc-card glass-card">
+                            <h4><i class="fa-solid fa-calculator"></i> Fee Estimator</h4>
+                            <select id="route-selector" class="custom-select">
+                                <!-- Injected via JS -->
+                            </select>
+                            <div class="calc-result" id="calc-result">
+                                <span class="calc-price">—</span>
+                                <span class="calc-label">Annual Transit Fee</span>
+                            </div>
+                        </div>
+                        <div class="routes-list-title">Bus Boarding Lines</div>
+                        <div class="drawer-list" id="routes-list-container">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Location & Contacts -->
+                <div class="drawer-tab-content" id="dtab-location">
+                    <div class="contacts-box">
+                        <div class="info-card glass-card">
+                            <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+                            <div class="info-body">
+                                <h5>Admissions Office</h5>
+                                <p class="strong-text">+91 99949 94991</p>
+                            </div>
+                        </div>
+                        <div class="info-card glass-card">
+                            <div class="info-icon"><i class="fa-solid fa-headset"></i></div>
+                            <div class="info-body">
+                                <h5>General Office Landline</h5>
+                                <p class="strong-text">0452-2465289</p>
+                            </div>
+                        </div>
+                        <div class="info-card glass-card">
+                            <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
+                            <div class="info-body">
+                                <h5>Principal Email</h5>
+                                <p class="strong-text">principal@vcet.ac.in</p>
+                            </div>
+                        </div>
+                        
+                        <div class="map-card glass-card">
+                            <h5>Campus Location Map</h5>
+                            <p class="small-address"><i class="fa-solid fa-map-pin"></i> Velammal Nagar, Madurai to Rameshwaram High Road, Viraganoor, Madurai - 625 009</p>
+                            <div class="simulated-map-container">
+                                <div class="sim-map">
+                                    <div class="sim-grid"></div>
+                                    <div class="sim-highway"></div>
+                                    <div class="sim-ringroad"></div>
+                                    <div class="sim-pin">
+                                        <div class="sim-pulse"></div>
+                                        <i class="fa-solid fa-graduation-cap"></i>
+                                        <span class="sim-tooltip">VCET Madurai</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Script file -->
+    <script src="app.js"></script>
+</body>
+</html>
